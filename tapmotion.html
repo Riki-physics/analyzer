@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>等間隔マーカー実験 x-t / v-t グラフ</title>
-
   <style>
     :root {
+      /* 白基調 + 黒文字 */
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --accent: #2563eb;
       --border-soft: #cbd5e1;
-      --text-main: #0f172a;
-      --text-sub: #475569;
+      --text-main: #0b0f1a;
+      --text-sub: #334155;
     }
     * { box-sizing: border-box; }
 
@@ -38,15 +38,16 @@
       align-items: baseline;
       gap: 0.4rem;
       letter-spacing: 0.03em;
+      color: var(--text-main);
     }
     h1 span.accent {
       font-size: 0.9rem;
       color: var(--accent);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .controls {
-      background: #ffffff;
+      background: var(--card-bg);
       border-radius: 14px;
       border: 1px solid var(--border-soft);
       padding: 0.75rem 0.9rem;
@@ -54,7 +55,7 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
     .controls-main {
       display: flex;
@@ -71,21 +72,22 @@
       gap: 0.4rem;
       padding: 0.2rem 0.6rem;
       border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: #f8fafc;
+      border: 1px solid rgba(100,116,139,0.35);
+      background: rgba(248,250,252,0.95);
     }
     label span.tag {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--accent);
+      font-weight: 700;
     }
 
     input[type="number"] {
       width: 4rem;
       padding: 0.15rem 0.45rem;
       border-radius: 999px;
-      border: 1px solid var(--border-soft);
+      border: 1px solid rgba(100,116,139,0.45);
       background: #ffffff;
       color: var(--text-main);
       font-size: 0.9rem;
@@ -99,18 +101,19 @@
       font-size: 0.9rem;
       padding: 0.35rem 0.9rem;
       border-radius: 999px;
-      border: 1px solid var(--border-soft);
+      border: 1px solid rgba(100,116,139,0.45);
       cursor: pointer;
       background: #ffffff;
       color: var(--text-main);
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      transition: background 0.15s ease, transform 0.05s ease;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
     }
     button:hover {
-      background: #f1f5f9;
       transform: translateY(-1px);
+      background: #f1f5f9;
+      border-color: rgba(100,116,139,0.65);
     }
 
     .hint {
@@ -126,7 +129,6 @@
       display: flex;
       justify-content: center;
     }
-
     #tapButton {
       width: min(420px, 100%);
       height: 22vh;
@@ -135,15 +137,17 @@
       font-size: 1.3rem;
       font-weight: 650;
       border-radius: 18px;
-      border: 2px solid var(--accent);
-      background: #eff6ff;
-      color: #1e3a8a;
+      border: 2px solid rgba(37,99,235,0.9);
+      background: radial-gradient(circle at top, rgba(37,99,235,0.12), rgba(255,255,255,0.98));
+      box-shadow:
+        0 12px 28px rgba(0,0,0,0.12),
+        0 0 0 1px rgba(37,99,235,0.12);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 0.4rem;
-      box-shadow: 0 6px 20px rgba(37,99,235,0.15);
     }
     #tapButton span.sub {
       font-size: 0.8rem;
@@ -151,7 +155,8 @@
       font-weight: 400;
     }
     #tapButton:active {
-      transform: scale(0.98);
+      transform: translateY(2px) scale(0.99);
+      background: radial-gradient(circle at top, rgba(37,99,235,0.18), rgba(255,255,255,0.98));
     }
 
     .layout {
@@ -172,11 +177,20 @@
     }
 
     .card {
-      background: #ffffff;
+      background: var(--card-bg);
       border-radius: 14px;
-      border: 1px solid var(--border-soft);
+      border: 1px solid rgba(100,116,139,0.35);
       padding: 0.55rem 0.7rem 0.65rem;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(37,99,235,0.06), transparent 60%);
+      pointer-events: none;
     }
 
     .card h2 {
@@ -186,15 +200,18 @@
       align-items: center;
       gap: 0.3rem;
       letter-spacing: 0.02em;
+      color: var(--text-main);
     }
     .card h2 span.badge {
       font-size: 0.7rem;
       padding: 0.05rem 0.4rem;
       border-radius: 999px;
-      border: 1px solid var(--accent);
+      border: 1px solid rgba(37,99,235,0.55);
       color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      font-weight: 700;
+      background: rgba(37,99,235,0.06);
     }
 
     .small {
@@ -209,7 +226,7 @@
       height: 200px;
       background: #ffffff;
       border-radius: 10px;
-      border: 1px solid var(--border-soft);
+      border: 1px solid rgba(100,116,139,0.35);
       display: block;
     }
 
@@ -220,21 +237,23 @@
       color: var(--text-main);
     }
     th, td {
-      border-bottom: 1px solid var(--border-soft);
+      border-bottom: 1px solid rgba(100,116,139,0.25);
       padding: 0.15rem 0.25rem;
       text-align: right;
       white-space: nowrap;
+      color: var(--text-main);
     }
     th {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-sub);
-      background: #f1f5f9;
+      background: rgba(241,245,249,0.95);
       position: sticky;
       top: 0;
       z-index: 1;
     }
-    tbody tr:nth-child(2n) td { background: #f8fafc; }
-    tbody tr:hover td { background: #e0f2fe; }
+    tbody tr:nth-child(2n) td { background: rgba(248,250,252,0.95); }
+    tbody tr:nth-child(2n+1) td { background: rgba(255,255,255,1); }
+    tbody tr:hover td { background: rgba(37,99,235,0.08); }
 
     td:first-child, th:first-child { text-align: center; }
 
@@ -242,168 +261,458 @@
       max-height: 260px;
       overflow: auto;
       border-radius: 10px;
-      border: 1px solid var(--border-soft);
+      border: 1px solid rgba(100,116,139,0.35);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6);
+      background: #ffffff;
     }
   </style>
 </head>
-
 <body>
-<div class="app">
-<header>
-  <h1>等間隔マーカー実験 <span class="accent">Tap → x-t / v-t graph</span></h1>
-</header>
+  <div class="app">
+    <header>
+      <h1>
+        等間隔マーカー実験
+        <span class="accent">Tap → x-t / v-t graph</span>
+      </h1>
+    </header>
 
-<section class="controls">
-  <div class="controls-main">
-    <label>
-      <span class="tag">marker</span>
-      Δx:
-      <input id="dxSlider" type="range" min="0.01" max="1.00" step="0.01" value="0.10">
-      <input id="dxInput" type="number" step="0.01" value="0.10"> m
-    </label>
-    <button id="startButton">▶ 測定開始</button>
-    <button id="stopButton">■ 測定終了</button>
-    <button id="resetButton">⟳ リセット</button>
-  </div>
-  <div class="hint">
-    マーカー通過時にタップ。<br>
-    x = (タップ番号 − 1) × Δx<br>
-    Spaceキーでも記録できます。
-  </div>
-</section>
+    <section class="controls">
+      <div class="controls-main">
+        <label>
+          <span class="tag">marker</span>
+          Δx:
+          <input id="dxSlider" type="range" min="0.01" max="1.00" step="0.01" value="0.10" />
+          <input id="dxInput" type="number" step="0.01" value="0.10" /> m
+        </label>
+        <button id="startButton">▶ 測定開始</button>
+        <button id="stopButton">■ 測定終了</button>
+        <button id="resetButton">⟳ リセット</button>
+      </div>
+      <div class="hint">
+        <strong>「測定開始」</strong>を押してから、物体がマーカーを通過する瞬間に下のエリアをタップしてください。<br>
+        1回目のタップを <strong>x = 0</strong> とし、
+        <strong>x = (タップ番号 − 1) × Δx</strong> として計算します。<br>
+        キーボードの <strong>Space</strong> キーでも記録できます。<br>
+        測定を終えたら<strong>「測定終了」</strong>を押してください。
+      </div>
+    </section>
 
-<div class="tap-area-wrapper">
-  <button id="tapButton">
-    タップして記録
-    <span class="sub">（測定中のみ有効）</span>
-  </button>
-</div>
-
-<section class="layout">
-  <article class="card">
-    <h2>データ一覧 <span class="badge">log</span></h2>
-    <div class="table-wrap">
-      <table id="dataTable">
-        <thead>
-          <tr>
-            <th>#</th><th>t [s]</th><th>x [m]</th><th>Δt [s]</th><th>v [m/s]</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="tap-area-wrapper">
+      <button id="tapButton">
+        タップして記録
+        <span class="sub">（測定中のみ有効 / Space キーも可）</span>
+      </button>
     </div>
-  </article>
 
-  <article class="card">
-    <h2>x-t グラフ <span class="badge">position</span></h2>
-    <canvas id="xtCanvas" width="400" height="240"></canvas>
-  </article>
+    <section class="layout">
+      <article class="card">
+        <h2>
+          データ一覧
+          <span class="badge">log</span>
+        </h2>
+        <div class="table-wrap">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>t [s]</th>
+                <th>x [m]</th>
+                <th>区間Δt [s]</th>
+                <th>区間v [m/s]</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
 
-  <article class="card">
-    <h2>v-t グラフ <span class="badge">velocity</span></h2>
-    <canvas id="vtCanvas" width="400" height="240"></canvas>
-    <div class="small">
-      平均加速度：<strong id="aDisplay">a: -</strong>
-    </div>
-  </article>
-</section>
-</div>
+      <article class="card">
+        <h2>
+          x-t グラフ
+          <span class="badge">position</span>
+        </h2>
+        <canvas id="xtCanvas" width="400" height="240"></canvas>
+      </article>
+
+      <article class="card">
+        <h2>
+          v-t グラフ
+          <span class="badge">velocity & a</span>
+        </h2>
+        <canvas id="vtCanvas" width="400" height="240"></canvas>
+        <div class="small">
+          v は「2点間の平均速度」。プロットした時刻は、その区間の <strong>時間の中点</strong> です。<br>
+          v-t グラフの<strong>傾き（最小二乗直線の傾き）</strong>を平均加速度 a とみなします。<br>
+          現在の推定値：<strong id="aDisplay">a: -</strong>（単位：m/s²）
+        </div>
+      </article>
+    </section>
+  </div>
 
 <script>
-let tapTimes=[],positions=[],vTimes=[],velocities=[];
-let startTime=null,isMeasuring=false;
+/* -----------------------------
+   データ管理
+----------------------------- */
+let tapTimes = [];
+let positions = [];
+let vTimes = [];
+let velocities = [];
 
-const dxInput=document.getElementById('dxInput');
-const dxSlider=document.getElementById('dxSlider');
-const tapButton=document.getElementById('tapButton');
-const startButton=document.getElementById('startButton');
-const stopButton=document.getElementById('stopButton');
-const resetButton=document.getElementById('resetButton');
-const dataTableBody=document.querySelector('#dataTable tbody');
-const xtCanvas=document.getElementById('xtCanvas');
-const vtCanvas=document.getElementById('vtCanvas');
-const aDisplay=document.getElementById('aDisplay');
+let startTime = null;
+let isMeasuring = false;
 
-const nowSec=()=>performance.now()/1000;
+const dxInput     = document.getElementById('dxInput');
+const dxSlider    = document.getElementById('dxSlider');
+const tapButton   = document.getElementById('tapButton');
+const startButton = document.getElementById('startButton');
+const stopButton  = document.getElementById('stopButton');
+const resetButton = document.getElementById('resetButton');
+const dataTableBody = document.querySelector('#dataTable tbody');
 
-dxSlider.oninput=()=>dxInput.value=parseFloat(dxSlider.value).toFixed(2);
-dxInput.oninput=()=>dxSlider.value=dxInput.value;
+const xtCanvas = document.getElementById('xtCanvas');
+const vtCanvas = document.getElementById('vtCanvas');
+const aDisplay = document.getElementById('aDisplay');
 
-function resetAll(){
-  tapTimes=[];positions=[];vTimes=[];velocities=[];
-  startTime=null;dataTableBody.innerHTML='';
-  [xtCanvas,vtCanvas].forEach(c=>c.getContext('2d').clearRect(0,0,c.width,c.height));
-  aDisplay.textContent='a: -';
-}
-startButton.onclick=()=>{resetAll();isMeasuring=true;}
-stopButton.onclick=()=>isMeasuring=false;
-resetButton.onclick=()=>{resetAll();isMeasuring=false;}
-
-tapButton.onclick=handleTap;
-document.onkeydown=e=>{if(e.code==='Space'){e.preventDefault();handleTap();}}
-
-function handleTap(){
-  if(!isMeasuring)return;
-  const dx=parseFloat(dxInput.value)||0.1;
-  const t=nowSec();
-  if(startTime===null)startTime=t;
-  const tt=t-startTime;
-  const x=tapTimes.length*dx;
-  tapTimes.push(tt);positions.push(x);
-  updateTable();computeVelocity();drawGraphs();
+function nowSec() {
+  return performance.now() / 1000;
 }
 
-function updateTable(){
-  dataTableBody.innerHTML='';
-  tapTimes.forEach((t,i)=>{
-    const dt=i? (t-tapTimes[i-1]).toFixed(3):'-';
-    const v=i? ((positions[i]-positions[i-1])/(t-tapTimes[i-1])).toFixed(3):'-';
-    dataTableBody.innerHTML+=
-      `<tr><td>${i+1}</td><td>${t.toFixed(3)}</td><td>${positions[i].toFixed(3)}</td><td>${dt}</td><td>${v}</td></tr>`;
+/* -----------------------------
+   Δx 入力とスライダーの連動
+----------------------------- */
+dxSlider.addEventListener('input', () => {
+  dxInput.value = parseFloat(dxSlider.value).toFixed(2);
+});
+dxInput.addEventListener('input', () => {
+  const v = parseFloat(dxInput.value);
+  if (!isNaN(v)) {
+    const clamped = Math.min(1.0, Math.max(0.01, v));
+    dxInput.value = clamped.toFixed(2);
+    dxSlider.value = clamped.toFixed(2);
+  }
+});
+
+/* -----------------------------
+   リセット
+----------------------------- */
+function resetAll() {
+  tapTimes = [];
+  positions = [];
+  vTimes = [];
+  velocities = [];
+  startTime = null;
+  dataTableBody.innerHTML = '';
+  clearCanvas(xtCanvas);
+  clearCanvas(vtCanvas);
+  if (aDisplay) aDisplay.textContent = 'a: -';
+}
+
+/* -----------------------------
+   測定開始・終了
+----------------------------- */
+function startMeasurement() {
+  resetAll();
+  isMeasuring = true;
+}
+
+function stopMeasurement() {
+  isMeasuring = false;
+}
+
+/* -----------------------------
+   タップ処理
+----------------------------- */
+function handleTap() {
+  if (!isMeasuring) return;  // 測定中でなければ無視
+
+  const dx = parseFloat(dxInput.value) || 0.1;
+  const tNow = nowSec();
+
+  if (startTime === null) startTime = tNow;
+  const t = tNow - startTime;
+
+  const index = tapTimes.length;
+  const x = index * dx;
+
+  tapTimes.push(t);
+  positions.push(x);
+
+  updateTable();
+  drawXTGraph();
+  computeVelocity();
+  drawVTGraph();
+}
+
+/* -----------------------------
+   速度計算
+----------------------------- */
+function computeVelocity() {
+  vTimes = [];
+  velocities = [];
+  for (let i = 1; i < tapTimes.length; i++) {
+    const dt = tapTimes[i] - tapTimes[i - 1];
+    const dx = positions[i] - positions[i - 1];
+    if (dt > 0) {
+      vTimes.push((tapTimes[i] + tapTimes[i - 1]) / 2);
+      velocities.push(dx / dt);
+    }
+  }
+}
+
+/* -----------------------------
+   表の更新
+----------------------------- */
+function updateTable() {
+  dataTableBody.innerHTML = '';
+
+  for (let i = 0; i < tapTimes.length; i++) {
+    const t = tapTimes[i];
+    const x = positions[i];
+
+    let dtStr = '-';
+    let vStr = '-';
+
+    if (i > 0) {
+      const dt = tapTimes[i] - tapTimes[i - 1];
+      const dx = positions[i] - positions[i - 1];
+      dtStr = dt.toFixed(3);
+      vStr = (dx / dt).toFixed(3);
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${t.toFixed(3)}</td>
+      <td>${x.toFixed(3)}</td>
+      <td>${dtStr}</td>
+      <td>${vStr}</td>
+    `;
+    dataTableBody.appendChild(tr);
+  }
+}
+
+/* -----------------------------
+   キャンバスクリア
+----------------------------- */
+function clearCanvas(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/* -----------------------------
+   散布図描画関数（軸文字・目盛りを黒基調に）
+----------------------------- */
+function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
+  const ctx = canvas.getContext('2d');
+  clearCanvas(canvas);
+  if (xs.length === 0) return;
+
+  const margin = 40;
+  const width  = canvas.width  - margin * 2;
+  const height = canvas.height - margin * 2;
+
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  const safMinX = Math.min(0, minX);
+  const safMaxX = Math.max(0, maxX === minX ? minX + 1 : maxX);
+
+  const rawMinY = Math.min(0, minY);
+  const rawMaxY = Math.max(0, maxY);
+  const yRange  = (rawMaxY - rawMinY) || 1;
+  const safMinY = rawMinY - 0.05 * yRange;
+  const safMaxY = rawMaxY + 0.05 * yRange;
+
+  const toCanvasX = x =>
+    margin + ((x - safMinX) / (safMaxX - safMinX)) * width;
+
+  const toCanvasY = y =>
+    margin + height - ((y - safMinY) / (safMaxY - safMinY)) * height;
+
+  /* ---- 目盛り ---- */
+  const tickCount = 5;
+  const yTicks = [];
+  const yStep = (safMaxY - safMinY) / (tickCount - 1);
+
+  for (let i = 0; i < tickCount; i++) {
+    yTicks.push(safMinY + i * yStep);
+  }
+  if (safMinY < 0 && safMaxY > 0) {
+    const idx = Math.round((0 - safMinY) / yStep);
+    if (idx >= 0 && idx < yTicks.length) yTicks[idx] = 0;
+  }
+
+  const xTicks = [];
+  const xStep = (safMaxX - safMinX) / (tickCount - 1);
+
+  for (let i = 0; i < tickCount; i++) {
+    xTicks.push(safMinX + i * xStep);
+  }
+  if (safMinX < 0 && safMaxX > 0) {
+    const idx = Math.round((0 - safMinX) / xStep);
+    if (idx >= 0 && idx < xTicks.length) xTicks[idx] = 0;
+  }
+
+  /* ---- グリッド線（薄いグレー） ---- */
+  ctx.save();
+  ctx.strokeStyle = 'rgba(100,116,139,0.25)'; /* slate */
+  ctx.setLineDash([2,6]);
+
+  yTicks.forEach(v => {
+    const cy = toCanvasY(v);
+    ctx.beginPath();
+    ctx.moveTo(margin, cy);
+    ctx.lineTo(margin + width, cy);
+    ctx.stroke();
   });
-}
 
-function computeVelocity(){
-  vTimes=[];velocities=[];
-  for(let i=1;i<tapTimes.length;i++){
-    const dt=tapTimes[i]-tapTimes[i-1];
-    vTimes.push((tapTimes[i]+tapTimes[i-1])/2);
-    velocities.push((positions[i]-positions[i-1])/dt);
+  xTicks.forEach(v => {
+    const cx = toCanvasX(v);
+    ctx.beginPath();
+    ctx.moveTo(cx, margin);
+    ctx.lineTo(cx, margin + height);
+    ctx.stroke();
+  });
+
+  /* 0 の線を少し強調（グレー濃いめ） */
+  ctx.strokeStyle = 'rgba(51,65,85,0.55)'; /* darker slate */
+  ctx.setLineDash([4,6]);
+  if (safMinX < 0 && safMaxX > 0) {
+    const cx0 = toCanvasX(0);
+    ctx.beginPath();
+    ctx.moveTo(cx0, margin);
+    ctx.lineTo(cx0, margin + height);
+    ctx.stroke();
+  }
+  if (safMinY < 0 && safMaxY > 0) {
+    const cy0 = toCanvasY(0);
+    ctx.beginPath();
+    ctx.moveTo(margin, cy0);
+    ctx.lineTo(margin + width, cy0);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  /* ---- 枠（黒） ---- */
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(margin, margin, width, height);
+
+  /* ---- ラベルと目盛り（黒） ---- */
+  ctx.font = '12px system-ui';
+  ctx.fillStyle = '#000';
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(xLabel, margin + width / 2, canvas.height - 20);
+
+  ctx.save();
+  ctx.translate(16, margin + height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  yTicks.forEach(v => {
+    ctx.fillText(v.toFixed(2), margin - 6, toCanvasY(v));
+  });
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  xTicks.forEach(v => {
+    ctx.fillText(v.toFixed(2), toCanvasX(v), margin + height + 2);
+  });
+
+  /* ---- プロット（色は元のまま） ---- */
+  ctx.fillStyle = color;
+  const r = 5;
+  for (let i = 0; i < xs.length; i++) {
+    ctx.beginPath();
+    ctx.arc(toCanvasX(xs[i]), toCanvasY(ys[i]), r, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
-function drawGraphs(){
-  drawScatter(xtCanvas,tapTimes,positions,'t [s]','x [m]','#facc15');
-  drawScatter(vtCanvas,vTimes,velocities,'t [s]','v [m/s]','#22c55e');
-  if(vTimes.length>1){
-    const a=calcSlope(vTimes,velocities);
-    aDisplay.textContent='a ≈ '+a.toFixed(3)+' m/s²';
+/* -----------------------------
+   v-t / x-t グラフ描画
+----------------------------- */
+function drawXTGraph() {
+  drawScatterGraph(
+    xtCanvas,
+    tapTimes,
+    positions,
+    't [s]',
+    'x [m]',
+    '#facc15'
+  );
+}
+
+/* 最小二乗法で傾きを求める */
+function computeSlope(xs, ys) {
+  if (xs.length < 2) return null;
+  const n = xs.length;
+  let sumX = 0, sumY = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += xs[i];
+    sumY += ys[i];
+  }
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+
+  let num = 0;
+  let den = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - meanX;
+    const dy = ys[i] - meanY;
+    num += dx * dy;
+    den += dx * dx;
+  }
+  if (den === 0) return null;
+  return num / den;  // 傾き a
+}
+
+function drawVTGraph() {
+  drawScatterGraph(
+    vtCanvas,
+    vTimes,
+    velocities,
+    't（区間の中点）[s]',
+    'v [m/s]',
+    '#22c55e'
+  );
+
+  // 傾き（平均加速度）の計算と表示
+  let a = computeSlope(vTimes, velocities);
+  if (!aDisplay) return;
+  if (a === null) {
+    aDisplay.textContent = 'a: -';
+  } else {
+    aDisplay.textContent = 'a ≈ ' + a.toFixed(3) + ' m/s²';
   }
 }
 
-function calcSlope(x,y){
-  const n=x.length;
-  const mx=x.reduce((a,b)=>a+b)/n;
-  const my=y.reduce((a,b)=>a+b)/n;
-  let num=0,den=0;
-  for(let i=0;i<n;i++){num+=(x[i]-mx)*(y[i]-my);den+=(x[i]-mx)**2;}
-  return num/den;
-}
+/* -----------------------------
+   イベント
+----------------------------- */
+tapButton.addEventListener('click', handleTap);
+startButton.addEventListener('click', startMeasurement);
+stopButton.addEventListener('click', stopMeasurement);
 
-function drawScatter(c,xs,ys,xl,yl,col){
-  const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-  if(!xs.length)return;
-  const m=40,w=c.width-80,h=c.height-80;
-  const minX=Math.min(...xs),maxX=Math.max(...xs);
-  const minY=Math.min(...ys),maxY=Math.max(...ys);
-  const tx=x=>m+(x-minX)/(maxX-minX||1)*w;
-  const ty=y=>m+h-(y-minY)/(maxY-minY||1)*h;
-  ctx.strokeStyle='#94a3b8';
-  ctx.strokeRect(m,m,w,h);
-  ctx.fillStyle=col;
-  xs.forEach((x,i)=>{ctx.beginPath();ctx.arc(tx(x),ty(ys[i]),4,0,Math.PI*2);ctx.fill();});
-}
+resetButton.addEventListener('click', () => {
+  resetAll();
+  isMeasuring = false;
+});
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    handleTap();
+  }
+});
 </script>
+
 </body>
 </html>
