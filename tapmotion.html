@@ -93,9 +93,7 @@
       font-size: 0.9rem;
     }
 
-    input[type="range"] {
-      width: 120px;
-    }
+    input[type="range"] { width: 120px; }
 
     button {
       font-size: 0.9rem;
@@ -283,7 +281,6 @@
           <input id="dxInput" type="number" step="0.01" value="0.10" /> m
         </label>
 
-        <!-- ★ 測定開始ボタンは削除（タップした瞬間から測定開始） -->
         <button id="stopButton">■ 測定停止</button>
         <button id="resetButton">⟳ リセット</button>
       </div>
@@ -359,8 +356,8 @@ let velocities = [];
 
 let startTime = null;
 
-/* ★ 測定開始ボタン廃止：最初のタップで自動開始。
-   初期状態は「測定中」にしておく（停止ボタンで止める）。 */
+/* 測定開始ボタン廃止：最初のタップで自動開始。
+   初期状態は「測定中」（停止ボタンで止める）。 */
 let isMeasuring = true;
 
 const dxInput     = document.getElementById('dxInput');
@@ -424,7 +421,7 @@ function handleTap() {
   const dx = parseFloat(dxInput.value) || 0.1;
   const tNow = nowSec();
 
-  if (startTime === null) startTime = tNow; // ★ 自動スタート
+  if (startTime === null) startTime = tNow; // 自動スタート
   const t = tNow - startTime;
 
   const index = tapTimes.length;
@@ -497,14 +494,15 @@ function clearCanvas(canvas) {
 
 /* -----------------------------
    散布図描画関数
-   ★ 目盛り数字と軸ラベルが被らないようにマージンを調整
+   目盛り数字と軸ラベルが被らないようにマージン調整
+   ★ 縦軸ラベル（v[m/s]など）をさらに左へずらして被り解消
 ----------------------------- */
 function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
   const ctx = canvas.getContext('2d');
   clearCanvas(canvas);
   if (xs.length === 0) return;
 
-  // ★ bottom を厚めにして「目盛り数字」と「x軸ラベル」を分離
+  // bottom を厚めにして「x目盛り数字」と「x軸ラベル」を分離
   const m = { left: 48, right: 18, top: 18, bottom: 54 };
 
   const plotW = canvas.width  - m.left - m.right;
@@ -603,9 +601,9 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
   ctx.textBaseline = 'alphabetic';
   ctx.fillText(xLabel, m.left + plotW / 2, canvas.height - 10);
 
-  // y軸ラベル（左外側、少し上に逃がす）
+  // y軸ラベル（左外側）★ここを左へずらす（被り解消）
   ctx.save();
-  ctx.translate(16, m.top + plotH / 2);
+  ctx.translate(8, m.top + plotH / 2);   // ← 16 → 8 に変更
   ctx.rotate(-Math.PI / 2);
   ctx.fillText(yLabel, 0, 0);
   ctx.restore();
@@ -617,7 +615,7 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
     ctx.fillText(v.toFixed(2), m.left - 8, toCanvasY(v));
   });
 
-  // x目盛り数字（ラベルと被らないよう「少し上」に配置）
+  // x目盛り数字（ラベルと被らないよう少し上）
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   xTicks.forEach(v => {
@@ -699,7 +697,7 @@ stopButton.addEventListener('click', stopMeasurement);
 
 resetButton.addEventListener('click', () => {
   resetAll();
-  isMeasuring = true;   // ★ リセット後はすぐ測定できる
+  isMeasuring = true; // リセット後はすぐ測定できる
 });
 
 document.addEventListener('keydown', e => {
