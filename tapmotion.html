@@ -121,7 +121,7 @@
       color: var(--text-sub);
       line-height: 1.4;
       margin-left: auto;
-      max-width: 380px;
+      max-width: 420px;
     }
 
     .tap-area-wrapper {
@@ -166,9 +166,7 @@
       margin-top: 0.8rem;
     }
     @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      }
+      .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     }
     @media (max-width: 780px) {
       .controls { flex-direction: column; align-items: flex-start; }
@@ -284,23 +282,24 @@
           <input id="dxSlider" type="range" min="0.01" max="1.00" step="0.01" value="0.10" />
           <input id="dxInput" type="number" step="0.01" value="0.10" /> m
         </label>
-        <button id="startButton">▶ 測定開始</button>
-        <button id="stopButton">■ 測定終了</button>
+
+        <!-- ★ 測定開始ボタンは削除（タップした瞬間から測定開始） -->
+        <button id="stopButton">■ 測定停止</button>
         <button id="resetButton">⟳ リセット</button>
       </div>
+
       <div class="hint">
-        <strong>「測定開始」</strong>を押してから、物体がマーカーを通過する瞬間に下のエリアをタップしてください。<br>
-        1回目のタップを <strong>x = 0</strong> とし、
+        下のエリアをタップ（または <strong>Space</strong>）すると<strong>その瞬間から自動で測定開始</strong>します。<br>
+        1回目の記録を <strong>x = 0</strong> とし、
         <strong>x = (タップ番号 − 1) × Δx</strong> として計算します。<br>
-        キーボードの <strong>Space</strong> キーでも記録できます。<br>
-        測定を終えたら<strong>「測定終了」</strong>を押してください。
+        止めたいときは <strong>「測定停止」</strong>、やり直すときは <strong>「リセット」</strong> を押してください。
       </div>
     </section>
 
     <div class="tap-area-wrapper">
       <button id="tapButton">
         タップして記録
-        <span class="sub">（測定中のみ有効 / Space キーも可）</span>
+        <span class="sub">（Space キーも可 / 停止中は無効）</span>
       </button>
     </div>
 
@@ -359,12 +358,14 @@ let vTimes = [];
 let velocities = [];
 
 let startTime = null;
-let isMeasuring = false;
+
+/* ★ 測定開始ボタン廃止：最初のタップで自動開始。
+   初期状態は「測定中」にしておく（停止ボタンで止める）。 */
+let isMeasuring = true;
 
 const dxInput     = document.getElementById('dxInput');
 const dxSlider    = document.getElementById('dxSlider');
 const tapButton   = document.getElementById('tapButton');
-const startButton = document.getElementById('startButton');
 const stopButton  = document.getElementById('stopButton');
 const resetButton = document.getElementById('resetButton');
 const dataTableBody = document.querySelector('#dataTable tbody');
@@ -408,27 +409,22 @@ function resetAll() {
 }
 
 /* -----------------------------
-   測定開始・終了
+   測定停止
 ----------------------------- */
-function startMeasurement() {
-  resetAll();
-  isMeasuring = true;
-}
-
 function stopMeasurement() {
   isMeasuring = false;
 }
 
 /* -----------------------------
-   タップ処理
+   タップ処理（最初のタップでスタート時刻を決める）
 ----------------------------- */
 function handleTap() {
-  if (!isMeasuring) return;  // 測定中でなければ無視
+  if (!isMeasuring) return; // 停止中は無視
 
   const dx = parseFloat(dxInput.value) || 0.1;
   const tNow = nowSec();
 
-  if (startTime === null) startTime = tNow;
+  if (startTime === null) startTime = tNow; // ★ 自動スタート
   const t = tNow - startTime;
 
   const index = tapTimes.length;
@@ -500,16 +496,19 @@ function clearCanvas(canvas) {
 }
 
 /* -----------------------------
-   散布図描画関数（軸文字・目盛りを黒基調に）
+   散布図描画関数
+   ★ 目盛り数字と軸ラベルが被らないようにマージンを調整
 ----------------------------- */
 function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
   const ctx = canvas.getContext('2d');
   clearCanvas(canvas);
   if (xs.length === 0) return;
 
-  const margin = 40;
-  const width  = canvas.width  - margin * 2;
-  const height = canvas.height - margin * 2;
+  // ★ bottom を厚めにして「目盛り数字」と「x軸ラベル」を分離
+  const m = { left: 48, right: 18, top: 18, bottom: 54 };
+
+  const plotW = canvas.width  - m.left - m.right;
+  const plotH = canvas.height - m.top  - m.bottom;
 
   const minX = Math.min(...xs);
   const maxX = Math.max(...xs);
@@ -526,19 +525,17 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
   const safMaxY = rawMaxY + 0.05 * yRange;
 
   const toCanvasX = x =>
-    margin + ((x - safMinX) / (safMaxX - safMinX)) * width;
+    m.left + ((x - safMinX) / (safMaxX - safMinX)) * plotW;
 
   const toCanvasY = y =>
-    margin + height - ((y - safMinY) / (safMaxY - safMinY)) * height;
+    m.top + plotH - ((y - safMinY) / (safMaxY - safMinY)) * plotH;
 
   /* ---- 目盛り ---- */
   const tickCount = 5;
+
   const yTicks = [];
   const yStep = (safMaxY - safMinY) / (tickCount - 1);
-
-  for (let i = 0; i < tickCount; i++) {
-    yTicks.push(safMinY + i * yStep);
-  }
+  for (let i = 0; i < tickCount; i++) yTicks.push(safMinY + i * yStep);
   if (safMinY < 0 && safMaxY > 0) {
     const idx = Math.round((0 - safMinY) / yStep);
     if (idx >= 0 && idx < yTicks.length) yTicks[idx] = 0;
@@ -546,10 +543,7 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
 
   const xTicks = [];
   const xStep = (safMaxX - safMinX) / (tickCount - 1);
-
-  for (let i = 0; i < tickCount; i++) {
-    xTicks.push(safMinX + i * xStep);
-  }
+  for (let i = 0; i < tickCount; i++) xTicks.push(safMinX + i * xStep);
   if (safMinX < 0 && safMaxX > 0) {
     const idx = Math.round((0 - safMinX) / xStep);
     if (idx >= 0 && idx < xTicks.length) xTicks[idx] = 0;
@@ -557,40 +551,40 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
 
   /* ---- グリッド線（薄いグレー） ---- */
   ctx.save();
-  ctx.strokeStyle = 'rgba(100,116,139,0.25)'; /* slate */
+  ctx.strokeStyle = 'rgba(100,116,139,0.25)';
   ctx.setLineDash([2,6]);
 
   yTicks.forEach(v => {
     const cy = toCanvasY(v);
     ctx.beginPath();
-    ctx.moveTo(margin, cy);
-    ctx.lineTo(margin + width, cy);
+    ctx.moveTo(m.left, cy);
+    ctx.lineTo(m.left + plotW, cy);
     ctx.stroke();
   });
 
   xTicks.forEach(v => {
     const cx = toCanvasX(v);
     ctx.beginPath();
-    ctx.moveTo(cx, margin);
-    ctx.lineTo(cx, margin + height);
+    ctx.moveTo(cx, m.top);
+    ctx.lineTo(cx, m.top + plotH);
     ctx.stroke();
   });
 
-  /* 0 の線を少し強調（グレー濃いめ） */
-  ctx.strokeStyle = 'rgba(51,65,85,0.55)'; /* darker slate */
+  /* 0 の線を少し強調 */
+  ctx.strokeStyle = 'rgba(51,65,85,0.55)';
   ctx.setLineDash([4,6]);
   if (safMinX < 0 && safMaxX > 0) {
     const cx0 = toCanvasX(0);
     ctx.beginPath();
-    ctx.moveTo(cx0, margin);
-    ctx.lineTo(cx0, margin + height);
+    ctx.moveTo(cx0, m.top);
+    ctx.lineTo(cx0, m.top + plotH);
     ctx.stroke();
   }
   if (safMinY < 0 && safMaxY > 0) {
     const cy0 = toCanvasY(0);
     ctx.beginPath();
-    ctx.moveTo(margin, cy0);
-    ctx.lineTo(margin + width, cy0);
+    ctx.moveTo(m.left, cy0);
+    ctx.lineTo(m.left + plotW, cy0);
     ctx.stroke();
   }
   ctx.restore();
@@ -598,32 +592,36 @@ function drawScatterGraph(canvas, xs, ys, xLabel, yLabel, color) {
   /* ---- 枠（黒） ---- */
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 1;
-  ctx.strokeRect(margin, margin, width, height);
+  ctx.strokeRect(m.left, m.top, plotW, plotH);
 
   /* ---- ラベルと目盛り（黒） ---- */
   ctx.font = '12px system-ui';
   ctx.fillStyle = '#000';
 
+  // x軸ラベル（最下段）
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.fillText(xLabel, margin + width / 2, canvas.height - 20);
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(xLabel, m.left + plotW / 2, canvas.height - 10);
 
+  // y軸ラベル（左外側、少し上に逃がす）
   ctx.save();
-  ctx.translate(16, margin + height / 2);
+  ctx.translate(16, m.top + plotH / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillText(yLabel, 0, 0);
   ctx.restore();
 
+  // y目盛り数字
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
   yTicks.forEach(v => {
-    ctx.fillText(v.toFixed(2), margin - 6, toCanvasY(v));
+    ctx.fillText(v.toFixed(2), m.left - 8, toCanvasY(v));
   });
 
+  // x目盛り数字（ラベルと被らないよう「少し上」に配置）
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   xTicks.forEach(v => {
-    ctx.fillText(v.toFixed(2), toCanvasX(v), margin + height + 2);
+    ctx.fillText(v.toFixed(2), toCanvasX(v), m.top + plotH + 6);
   });
 
   /* ---- プロット（色は元のまま） ---- */
@@ -671,7 +669,7 @@ function computeSlope(xs, ys) {
     den += dx * dx;
   }
   if (den === 0) return null;
-  return num / den;  // 傾き a
+  return num / den;
 }
 
 function drawVTGraph() {
@@ -684,7 +682,6 @@ function drawVTGraph() {
     '#22c55e'
   );
 
-  // 傾き（平均加速度）の計算と表示
   let a = computeSlope(vTimes, velocities);
   if (!aDisplay) return;
   if (a === null) {
@@ -698,12 +695,11 @@ function drawVTGraph() {
    イベント
 ----------------------------- */
 tapButton.addEventListener('click', handleTap);
-startButton.addEventListener('click', startMeasurement);
 stopButton.addEventListener('click', stopMeasurement);
 
 resetButton.addEventListener('click', () => {
   resetAll();
-  isMeasuring = false;
+  isMeasuring = true;   // ★ リセット後はすぐ測定できる
 });
 
 document.addEventListener('keydown', e => {
